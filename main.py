@@ -8,7 +8,7 @@ from core import (IMU)
 def main() -> None:
     # Variables (Assignment):
     # IMU:
-    imu: IMU = IMU(enable_predictions=True)
+    imu: IMU = IMU(enable_predictions=False)
 
     # Initialization:
     # Gadgets:

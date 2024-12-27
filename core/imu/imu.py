@@ -3,6 +3,7 @@
 
 # Phidget:
 from Phidget22.Devices.Accelerometer import (Accelerometer)
+from Phidget22.Devices.Gyroscope import (Gyroscope)
 
 # Telemetry:
 from ..telemetry import (Telemetry)
@@ -38,7 +39,10 @@ class IMU:
         # Gadgets:
         self.gadgets: Dict[str, Callable] = {
             # Accelerometer:
-            "accelerometer": Accelerometer()
+            "accelerometer": Accelerometer(),
+
+            # Gyroscope:
+            "gyroscope": Gyroscope()
         }
 
         # Stack:
@@ -59,7 +63,7 @@ class IMU:
         ) -> None:
             # Variables (Assignment):
             # Message:
-            message: str = "{} | {}".format(
+            message: str = "Acceleration: {} | {}".format(
                 # Acceleration:
                 ",".join(map(str, acceleration)),
 
@@ -83,10 +87,41 @@ class IMU:
                 else:
                     logger.info("[*] Not enough data to perform a prediction.")
 
+        # Rotation:
+        def on_angular_rate_update_handler(
+            # Gyroscope:
+            gyroscope: Gyroscope,
+
+            # Rotation:
+            angular_rotation: List[float],
+
+            # Timestamp:
+            timestamp: float
+        ) -> None:
+            # Variables (Assignment):
+            # Message:
+            message: str = "Rotation: {} | {}".format(
+                # Acceleration:
+                ",".join(map(str, angular_rotation)),
+
+                # Timestamp:
+                timestamp
+            )
+
+            # Logger:
+            # Message:
+            logger.info(message)
+
+            # Border:
+            print("-" * 30)
+
         # Accelerometer:
         self.gadgets["accelerometer"].setOnAccelerationChangeHandler(
             on_acceleration_change_handler
         )
+
+        # Gyroscope:
+        self.gadgets["gyroscope"].setOnAngularRateUpdateHandler(on_angular_rate_update_handler)
 
     def initialize_gadgets(self) -> None:
         # Initialization:
