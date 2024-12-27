@@ -1,0 +1,6 @@
+# Written by: Christopher Gholmieh
+# Virtual Environment:
+venv
+
+# Pycache:
+__pycache__
