@@ -53,7 +53,8 @@ class IMU:
         }
 
         # Stack:
-        self.stack: Stack = Stack(maximum_length=3)
+        self.acceleration_stack: Stack = Stack(maximum_length=3)
+        self.gyroscope_stack: Stack = Stack(maximum_length=3)
 
     # Methods:
     def initialize_handlers(self) -> None:
@@ -83,19 +84,14 @@ class IMU:
 
             # Logic:
             self.telemetry.append(acceleration)
-            self.stack.append(acceleration)
 
+            # Collection:
             if self.collect:
                 self.acceleration_data.append(acceleration)
 
             # Predictions:
             if self.enable_predictions:
-                if len(self.stack) == 3:
-                    logger.info("[*] Prediction: {}".format(
-                        self.learner.predict(self.stack.buffer)
-                    ))
-                else:
-                    logger.info("[*] Not enough data to perform a prediction.")
+                self.acceleration_stack.append(acceleration)
 
         # Rotation:
         def on_angular_rate_update_handler(
@@ -122,6 +118,17 @@ class IMU:
             # Message:
             logger.info(message)
 
+            # Predictions:
+            if self.enable_predictions:
+                self.gyroscope_stack.append(angular_rotation)
+
+                if len(self.acceleration_stack) == 3 and len(self.gyroscope_stack) == 3:
+                    logger.info("[*] Prediction: {}".format(
+                        self.learner.predict(self.combine_stacks())
+                    ))
+                else:
+                    logger.info("[*] Not enough data to perform a prediction.")
+
             # Border:
             print("-" * 30)
 
@@ -145,6 +152,13 @@ class IMU:
 
             # Interval:
             gadget.setDataInterval(1000)
+
+    def combine_stacks(self) -> List[List[float]]:
+        return [
+            acceleration + gyroscope for acceleration, gyroscope in zip(
+                self.acceleration_stack.buffer, self.gyroscope_stack.buffer
+            )
+        ]
 
     def terminate(self) -> None:
         # Termination:
