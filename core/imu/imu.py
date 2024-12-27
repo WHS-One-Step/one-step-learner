@@ -24,7 +24,11 @@ from ..stack import (Stack)
 # IMU:
 class IMU:
     # Initialization:
-    def __init__(self, enable_predictions: bool = False, learner_path: str = "learner/one-step-learner.pkl"):
+    def __init__(self, enable_predictions: bool = False, learner_path: str = "learner/one-step-learner.pkl", collect: bool = False):
+        # Data:
+        self.acceleration_data: List[float, float, float] = []
+        self.gyroscope_data: List[float, float, float] = []
+
         # Constants:
         # Predictions:
         self.enable_predictions: bool = enable_predictions
@@ -33,8 +37,11 @@ class IMU:
         self.telemetry: Telemetry = Telemetry()
 
         # Learner:
-        self.learner = Learner(learner_path)
+        self.learner: Learner = Learner(learner_path)
         self.learner.load()
+
+        # Collect:
+        self.collect: bool = collect
 
         # Gadgets:
         self.gadgets: Dict[str, Callable] = {
@@ -78,6 +85,9 @@ class IMU:
             self.telemetry.append(acceleration)
             self.stack.append(acceleration)
 
+            if self.collect:
+                self.acceleration_data.append(acceleration)
+
             # Predictions:
             if self.enable_predictions:
                 if len(self.stack) == 3:
@@ -114,6 +124,10 @@ class IMU:
 
             # Border:
             print("-" * 30)
+
+            # Logic:
+            if self.collect:
+                self.gyroscope_data.append(angular_rotation)
 
         # Accelerometer:
         self.gadgets["accelerometer"].setOnAccelerationChangeHandler(
