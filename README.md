@@ -13,6 +13,8 @@ The purpose of this repository is to contain a training environment to produce o
 - interact-learner.py: Provides an interface to have a learner predict or be trained on data.
 
 ## Installation:
+To install the project, execute the following commands in a Linux terminal.
+
 ```bash
 # Clone Repository:
 git clone https://https://github.com/whs-one-step/one-step-learner && cd ./one-step-learner/
